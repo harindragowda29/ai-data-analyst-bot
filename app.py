@@ -10,7 +10,7 @@ import re
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 st.set_page_config(page_title="AI SQL Agent", layout="wide")
-st.title("🤖 AI Data Agent (CSV → SQL → Insights)")
+st.title("🤖 AI Data Agent ")
 
 # ---- FILE UPLOAD ----
 uploaded_file = st.file_uploader("Upload CSV or Excel", type=["csv", "xlsx"])
