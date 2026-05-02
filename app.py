@@ -4,6 +4,7 @@ import sqlite3
 import plotly.express as px
 from groq import Groq
 import os
+import re
 
 # ---- GROQ CLIENT ----
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -21,7 +22,7 @@ if uploaded_file is not None:
         if uploaded_file.name.endswith(".csv"):
             try:
                 df = pd.read_csv(uploaded_file, encoding="utf-8")
-            except:
+            except Exception:
                 df = pd.read_csv(uploaded_file, encoding="latin1")
         else:
             df = pd.read_excel(uploaded_file)
@@ -30,7 +31,7 @@ if uploaded_file is not None:
             st.error("⚠️ File is empty or invalid.")
             st.stop()
 
-    except Exception as e:
+    except Exception:
         st.error("❌ Error reading file.")
         st.stop()
 
@@ -58,27 +59,23 @@ if uploaded_file is not None:
         Table name: data
         Columns: {schema}
 
-        Convert the following question into a valid SQLite query.
-        Only return SQL query.
+        Convert the question into a valid SQLite query.
+        Only return plain SQL. No markdown.
 
         Question: {user_question}
         """
 
-              try:
+        try:
             # ---- GENERATE SQL ----
             response = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}]
             )
 
-            # 👇 MUST be same indentation as response
             sql_query = response.choices[0].message.content.strip()
 
-            # 🔥 CLEAN MARKDOWN
-            sql_query = sql_query.replace("```sql", "").replace("```", "").strip()
-
-            st.subheader("🧾 Generated SQL")
-            st.code(sql_query, language="sql")
+            # ---- CLEAN MARKDOWN ----
+            sql_query = re.sub(r"```.*?```", "", sql_query, flags=re.DOTALL).strip()
 
             # ---- SAFETY CHECK ----
             if any(word in sql_query.lower() for word in ["drop", "delete", "update", "insert"]):
@@ -93,6 +90,10 @@ if uploaded_file is not None:
 
             st.subheader("📊 Result")
             st.dataframe(result)
+
+            # ---- SINGLE VALUE KPI ----
+            if result.shape[1] == 1:
+                st.metric(label=result.columns[0], value=result.iloc[0, 0])
 
             # ---- CHART CONTROL ----
             chart_type = st.selectbox(
