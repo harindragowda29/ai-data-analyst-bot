@@ -70,8 +70,10 @@ if uploaded_file is not None:
                 model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}]
             )
+            import re
 
-            sql_query = response.choices[0].message.content.strip()
+          sql_query = response.choices[0].message.content.strip()
+sql_query = sql_query.replace("```sql", "").replace("```", "").strip()
 
             # ---- SAFETY CHECK ----
             if any(word in sql_query.lower() for word in ["drop", "delete", "update", "insert"]):
