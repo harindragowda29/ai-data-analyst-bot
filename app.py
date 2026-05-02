@@ -12,19 +12,31 @@ st.title("🤖 AI Data Analyst Bot")
 st.write("Upload your CSV file and ask questions about your data!")
 
 # ---- FILE UPLOAD ----
-uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
+uploaded_file = st.file_uploader("Upload CSV", type=["csv", "xlsx"])
 
-if uploaded_file:
+if uploaded_file is not None:
     try:
-        df = pd.read_csv(uploaded_file, encoding='utf-8')
-    except:
-        df = pd.read_csv(uploaded_file, encoding='latin1')
-    
-    st.subheader("📊 Data Preview")
-    st.dataframe(df.head())
+        # Check file type
+        if uploaded_file.name.endswith(".csv"):
+            try:
+                df = pd.read_csv(uploaded_file, encoding='utf-8')
+            except:
+                df = pd.read_csv(uploaded_file, encoding='latin1')
 
-    st.write("### 📌 Basic Info")
-    st.write(df.describe())
+        elif uploaded_file.name.endswith(".xlsx"):
+            df = pd.read_excel(uploaded_file)
+
+        # Check if empty
+        if df.empty:
+            st.error("⚠️ Uploaded file is empty!")
+            st.stop()
+
+        st.subheader("📊 Data Preview")
+        st.dataframe(df.head())
+
+    except Exception as e:
+        st.error(f"❌ Error reading file: {e}")
+        st.stop()
 
     # ---- USER QUESTION ----
     question = st.text_input("Ask a question about your data:")
