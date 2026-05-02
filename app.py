@@ -2,11 +2,10 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import plotly.express as px
+from groq import Groq
 import os
-from openai import OpenAI
 
-# ---- OPENAI CLIENT ----
-client = OpenAI()
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 st.set_page_config(page_title="AI SQL Agent", layout="wide")
 st.title("🤖 AI Data Agent (CSV → SQL → Insights)")
@@ -67,8 +66,9 @@ if uploaded_file is not None:
 
         try:
             # ---- GENERATE SQL ----
+               
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="llama3-70b-8192",
                 messages=[{"role": "user", "content": prompt}]
             )
 
