@@ -68,7 +68,7 @@ if uploaded_file is not None:
             # ---- GENERATE SQL ----
                
             response = client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.1-70b-versatile",
                 messages=[{"role": "user", "content": prompt}]
             )
 
