@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-import openai
+from openai import OpenAI
+client = OpenAI()
 import plotly.express as px
 import os
 
@@ -48,10 +49,15 @@ if uploaded_file:
         Only return SQL query, no explanation.
         """
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
-        )
+        from openai import OpenAI
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": prompt}]
+)
+
+sql_query = response.choices[0].message.content
 
         sql_query = response['choices'][0]['message']['content']
 
