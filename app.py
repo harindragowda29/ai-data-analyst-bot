@@ -15,7 +15,10 @@ st.write("Upload your CSV file and ask questions about your data!")
 uploaded_file = st.file_uploader("Upload CSV", type=["csv"])
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file)
+    try:
+        df = pd.read_csv(uploaded_file, encoding='utf-8')
+    except:
+        df = pd.read_csv(uploaded_file, encoding='latin1')
     
     st.subheader("📊 Data Preview")
     st.dataframe(df.head())
