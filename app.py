@@ -16,16 +16,35 @@ uploaded_file = st.file_uploader("Upload CSV", type=["csv", "xlsx"])
 
 if uploaded_file is not None:
     try:
-        # Check file type
+        # Handle CSV
         if uploaded_file.name.endswith(".csv"):
             try:
                 df = pd.read_csv(uploaded_file, encoding='utf-8')
             except:
-                df = pd.read_csv(uploaded_file, encoding='latin1')
+                try:
+                    df = pd.read_csv(uploaded_file, encoding='latin1')
+                except:
+                    df = pd.read_csv(uploaded_file, sep=';')  # handle different delimiter
 
+        # Handle Excel
         elif uploaded_file.name.endswith(".xlsx"):
             df = pd.read_excel(uploaded_file)
 
+        # Check empty or invalid
+        if df.shape[1] == 0:
+            st.error("⚠️ File has no columns. Please upload a valid CSV/Excel file.")
+            st.stop()
+
+        if df.empty:
+            st.error("⚠️ File is empty.")
+            st.stop()
+
+        st.success("✅ File loaded successfully!")
+        st.dataframe(df.head())
+
+    except Exception as e:
+        st.error("❌ Unable to read file. Please upload a proper CSV or Excel file.")
+        st.stop()
         # Check if empty
         if df.empty:
             st.error("⚠️ Uploaded file is empty!")
