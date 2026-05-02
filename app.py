@@ -64,16 +64,21 @@ if uploaded_file is not None:
         Question: {user_question}
         """
 
-        try:
+              try:
             # ---- GENERATE SQL ----
             response = client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}]
             )
-            import re
 
-          sql_query = response.choices[0].message.content.strip()
-sql_query = sql_query.replace("```sql", "").replace("```", "").strip()
+            # 👇 MUST be same indentation as response
+            sql_query = response.choices[0].message.content.strip()
+
+            # 🔥 CLEAN MARKDOWN
+            sql_query = sql_query.replace("```sql", "").replace("```", "").strip()
+
+            st.subheader("🧾 Generated SQL")
+            st.code(sql_query, language="sql")
 
             # ---- SAFETY CHECK ----
             if any(word in sql_query.lower() for word in ["drop", "delete", "update", "insert"]):
